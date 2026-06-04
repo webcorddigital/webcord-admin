@@ -1,0 +1,66 @@
+.layout {
+  display: flex;
+  min-height: 100vh;
+}
+
+.sidebar {
+  width: 220px;
+  background: var(--bg-card);
+  border-right: 1px solid var(--border);
+  padding: 28px 16px;
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow-y: auto;
+}
+
+.brand {
+  font-family: var(--font-hero);
+  font-size: 1.4rem;
+  letter-spacing: 0.2em;
+  color: var(--text);
+  padding: 0 8px 24px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 20px;
+}
+
+.nav {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+}
+
+.navItem {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  font-size: 0.88rem;
+  color: var(--text-muted);
+  text-decoration: none;
+  transition: background 0.15s, color 0.15s;
+  border: none;
+  background: none;
+  cursor: pointer;
+  width: 100%;
+  font-family: var(--font-body);
+}
+.navItem:hover { background: var(--bg-hover); color: var(--text); }
+.active { background: var(--bg-hover); color: var(--text); }
+
+.logout {
+  margin-top: auto;
+  color: var(--danger);
+}
+.logout:hover { background: rgba(239,68,68,0.1); color: var(--danger); }
+
+.main {
+  flex: 1;
+  padding: 40px;
+  overflow-x: hidden;
+}
