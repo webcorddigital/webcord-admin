@@ -4,10 +4,10 @@ import { v } from "convex/values";
 // Public: Get all approved reviews
 export const getApprovedReviews = query({
   args: {},
-  handler: async (ctx) => {
+  handler: async (ctx: any) => {
     return await ctx.db
       .query("reviews")
-      .withIndex("by_status", (q) => q.eq("status", "approved"))
+      .withIndex("by_status", (q: any) => q.eq("status", "approved"))
       .order("desc")
       .collect();
   },
@@ -22,7 +22,7 @@ export const submitReview = mutation({
     text: v.string(),
     rating: v.number(),
   },
-  handler: async (ctx, args) => {
+  handler: async (ctx: any, args: any) => {
     return await ctx.db.insert("reviews", {
       ...args,
       status: "pending",
@@ -36,10 +36,10 @@ export const getReviewsByStatus = query({
   args: {
     status: v.union(v.literal("pending"), v.literal("approved"), v.literal("rejected")),
   },
-  handler: async (ctx, args) => {
+  handler: async (ctx: any, args: any) => {
     return await ctx.db
       .query("reviews")
-      .withIndex("by_status", (q) => q.eq("status", args.status))
+      .withIndex("by_status", (q: any) => q.eq("status", args.status))
       .order("desc")
       .collect();
   },
@@ -48,7 +48,7 @@ export const getReviewsByStatus = query({
 // Admin: approve review
 export const approveReview = mutation({
   args: { id: v.id("reviews") },
-  handler: async (ctx, args) => {
+  handler: async (ctx: any, args: any) => {
     await ctx.db.patch(args.id, { status: "approved" });
   },
 });
@@ -56,7 +56,7 @@ export const approveReview = mutation({
 // Admin: reject review
 export const rejectReview = mutation({
   args: { id: v.id("reviews") },
-  handler: async (ctx, args) => {
+  handler: async (ctx: any, args: any) => {
     await ctx.db.patch(args.id, { status: "rejected" });
   },
 });
@@ -64,7 +64,7 @@ export const rejectReview = mutation({
 // Admin: delete review
 export const deleteReview = mutation({
   args: { id: v.id("reviews") },
-  handler: async (ctx, args) => {
+  handler: async (ctx: any, args: any) => {
     await ctx.db.delete(args.id);
   },
 });
