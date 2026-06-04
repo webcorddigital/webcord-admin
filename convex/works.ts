@@ -4,7 +4,7 @@ import { v } from "convex/values";
 // Get all works (for public display), newest first
 export const getWorks = query({
   args: {},
-  handler: async (ctx) => {
+  handler: async (ctx: any) => {
     return await ctx.db.query("works").order("desc").collect();
   },
 });
@@ -12,7 +12,7 @@ export const getWorks = query({
 // Admin: get all works
 export const getAllWorks = query({
   args: {},
-  handler: async (ctx) => {
+  handler: async (ctx: any) => {
     return await ctx.db.query("works").order("desc").collect();
   },
 });
@@ -26,7 +26,7 @@ export const addWork = mutation({
     description: v.optional(v.string()),
     order: v.optional(v.number()),
   },
-  handler: async (ctx, args) => {
+  handler: async (ctx: any, args: any) => {
     return await ctx.db.insert("works", {
       ...args,
       createdAt: Date.now(),
@@ -44,7 +44,7 @@ export const updateWork = mutation({
     description: v.optional(v.string()),
     order: v.optional(v.number()),
   },
-  handler: async (ctx, args) => {
+  handler: async (ctx: any, args: any) => {
     const { id, ...fields } = args;
     const filtered = Object.fromEntries(
       Object.entries(fields).filter(([, v]) => v !== undefined)
@@ -56,7 +56,7 @@ export const updateWork = mutation({
 // Admin: delete a work
 export const deleteWork = mutation({
   args: { id: v.id("works") },
-  handler: async (ctx, args) => {
+  handler: async (ctx: any, args: any) => {
     await ctx.db.delete(args.id);
   },
 });
@@ -64,7 +64,7 @@ export const deleteWork = mutation({
 // Generate upload URL for image storage
 export const generateUploadUrl = mutation({
   args: {},
-  handler: async (ctx) => {
+  handler: async (ctx: any) => {
     return await ctx.storage.generateUploadUrl();
   },
 });
@@ -75,7 +75,7 @@ export const saveWorkImageId = mutation({
     id: v.id("works"),
     storageId: v.id("_storage"),
   },
-  handler: async (ctx, args) => {
+  handler: async (ctx: any, args: any) => {
     const url = await ctx.storage.getUrl(args.storageId);
     await ctx.db.patch(args.id, {
       imageId: args.storageId,
@@ -87,7 +87,7 @@ export const saveWorkImageId = mutation({
 // Get image URL by storage ID
 export const getImageUrl = query({
   args: { storageId: v.id("_storage") },
-  handler: async (ctx, args) => {
+  handler: async (ctx: any, args: any) => {
     return await ctx.storage.getUrl(args.storageId);
   },
 });
