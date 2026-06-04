@@ -4,10 +4,10 @@ import { v } from "convex/values";
 // Get a single setting by key
 export const getSetting = query({
   args: { key: v.string() },
-  handler: async (ctx, args) => {
+  handler: async (ctx: any, args: any) => {
     const setting = await ctx.db
       .query("site_settings")
-      .withIndex("by_key", (q) => q.eq("key", args.key))
+      .withIndex("by_key", (q: any) => q.eq("key", args.key))
       .unique();
     return setting?.value ?? null;
   },
@@ -16,7 +16,7 @@ export const getSetting = query({
 // Get all settings
 export const getAllSettings = query({
   args: {},
-  handler: async (ctx) => {
+  handler: async (ctx: any) => {
     const settings = await ctx.db.query("site_settings").collect();
     const result: Record<string, unknown> = {};
     for (const s of settings) {
@@ -32,10 +32,10 @@ export const setSetting = mutation({
     key: v.string(),
     value: v.any(),
   },
-  handler: async (ctx, args) => {
+  handler: async (ctx: any, args: any) => {
     const existing = await ctx.db
       .query("site_settings")
-      .withIndex("by_key", (q) => q.eq("key", args.key))
+      .withIndex("by_key", (q: any) => q.eq("key", args.key))
       .unique();
     if (existing) {
       await ctx.db.patch(existing._id, { value: args.value, updatedAt: Date.now() });
