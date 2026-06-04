@@ -1,0 +1,60 @@
+.title {
+  font-family: var(--font-hero);
+  font-size: 2.4rem;
+  letter-spacing: 0.06em;
+  color: var(--text);
+  margin-bottom: 6px;
+}
+.sub {
+  font-size: 0.88rem;
+  color: var(--text-muted);
+  margin-bottom: 40px;
+}
+.statsGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-bottom: 40px;
+}
+.statCard {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 28px 24px;
+}
+.highlight { border-color: var(--pending); }
+.statNum {
+  font-family: var(--font-hero);
+  font-size: 3rem;
+  letter-spacing: 0.02em;
+  line-height: 1;
+  color: var(--text);
+  margin-bottom: 8px;
+}
+.statLabel {
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+.quickLinks {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.ql {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 20px 24px;
+  text-decoration: none;
+  transition: border-color 0.2s, background 0.2s;
+}
+.ql:hover { background: var(--bg-hover); border-color: var(--text-dim); }
+.qlIcon { font-size: 1.8rem; }
+.ql strong { display: block; font-size: 0.95rem; color: var(--text); margin-bottom: 2px; }
+.ql p { font-size: 0.8rem; color: var(--text-muted); }
