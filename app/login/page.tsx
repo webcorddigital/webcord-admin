@@ -1,21 +1,25 @@
 "use client";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/AuthContext";
 import { Lock } from "lucide-react";
 import styles from "./login.module.css";
 
 export default function LoginPage() {
   const { login } = useAuth();
+  const router = useRouter();
   const [pw, setPw] = useState("");
   const [error, setError] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const ok = login(pw);
+    const ok = await login(pw);
     if (!ok) {
       setError(true);
       setPw("");
       setTimeout(() => setError(false), 2000);
+    } else {
+      router.push("/dashboard");
     }
   };
 
