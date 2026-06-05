@@ -55,6 +55,16 @@
   transition: border-color 0.2s, background 0.2s;
 }
 .ql:hover { background: var(--bg-hover); border-color: var(--text-dim); }
-.qlIcon { font-size: 1.8rem; }
+.qlIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  color: var(--text-muted);
+  flex-shrink: 0;
+}
 .ql strong { display: block; font-size: 0.95rem; color: var(--text); margin-bottom: 2px; }
 .ql p { font-size: 0.8rem; color: var(--text-muted); }
