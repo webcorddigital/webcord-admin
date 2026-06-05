@@ -2,9 +2,11 @@
 import { useQuery, useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { useState, useRef } from "react";
-import { Plus, Trash2, Edit2, X, Check, ExternalLink } from "lucide-react";
+import { Plus, Trash2, X, Check, ExternalLink, Upload } from "lucide-react";
 import styles from "./works.module.css";
 import { Id } from "@/convex/_generated/dataModel";
+import toast from "react-hot-toast";
+import Modal from "@/components/Modal";
 
 // Convert any image to WebP using Canvas
 async function toWebpBlob(file: File, quality = 0.82): Promise<Blob> {
@@ -41,11 +43,13 @@ export default function WorksPage() {
   const saveImageId = useMutation(api.works.saveWorkImageId);
 
   const [showForm, setShowForm] = useState(false);
-  const [editId, setEditId] = useState<Id<"works"> | null>(null);
   const [form, setForm] = useState({ title: "", link: "", description: "" });
   const [imgFile, setImgFile] = useState<File | null>(null);
   const [imgPreview, setImgPreview] = useState<string>("");
   const [loading, setLoading] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
+  const [deleteId, setDeleteId] = useState<Id<"works"> | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -61,7 +65,9 @@ export default function WorksPage() {
     e.preventDefault();
     if (!form.title || !form.link) return;
     setLoading(true);
-    try {
+    setUploadError(null);
+    
+    const promise = (async () => {
       // 1. Insert work entry
       const workId = await addWork({
         title: form.title,
@@ -71,34 +77,58 @@ export default function WorksPage() {
 
       // 2. Upload image if provided
       if (imgFile && workId) {
-        const webpBlob = await toWebpBlob(imgFile);
-        const uploadUrl = await generateUploadUrl();
-        const res = await fetch(uploadUrl, {
-          method: "POST",
-          headers: { "Content-Type": "image/webp" },
-          body: webpBlob,
-        });
-        if (res.ok) {
-          const { storageId } = await res.json();
-          await saveImageId({ id: workId as Id<"works">, storageId });
+        try {
+          const webpBlob = await toWebpBlob(imgFile);
+          const uploadUrl = await generateUploadUrl();
+          const res = await fetch(uploadUrl, {
+            method: "POST",
+            headers: { "Content-Type": "image/webp" },
+            body: webpBlob,
+          });
+          if (res.ok) {
+            const data = await res.json();
+            const storageId = (data.storageId ?? data) as Id<"_storage">;
+            await saveImageId({ id: workId as Id<"works">, storageId });
+          } else {
+            console.error("Image upload failed:", res.status, res.statusText);
+          }
+        } catch (imgErr) {
+          console.error("Image upload error:", imgErr);
         }
       }
 
       setForm({ title: "", link: "", description: "" });
       setImgFile(null);
       setImgPreview("");
+      if (fileRef.current) fileRef.current.value = "";
       setShowForm(false);
-    } catch (err) {
-      console.error(err);
-      alert("Error adding work");
+    })();
+
+    toast.promise(promise, {
+      loading: 'Saving work...',
+      success: 'Work added successfully!',
+      error: 'Failed to save work.',
+    });
+
+    try {
+      await promise;
     } finally {
       setLoading(false);
     }
   };
 
-  const handleDelete = async (id: Id<"works">) => {
-    if (!confirm("Delete this work? This cannot be undone.")) return;
-    await deleteWork({ id });
+  const confirmDelete = async () => {
+    if (!deleteId) return;
+    setIsDeleting(true);
+    try {
+      await deleteWork({ id: deleteId });
+      toast.success("Work deleted successfully");
+    } catch (e) {
+      toast.error("Failed to delete work");
+    } finally {
+      setIsDeleting(false);
+      setDeleteId(null);
+    }
   };
 
   return (
@@ -148,10 +178,15 @@ export default function WorksPage() {
                   </div>
                 )}
               </div>
+              {uploadError && (
+                <p style={{ color: "var(--danger)", fontSize: "0.82rem", marginTop: "-8px", marginBottom: "8px" }}>
+                  {uploadError}
+                </p>
+              )}
               <div className={styles.actions}>
-                <button type="button" className="btn btn-ghost" onClick={() => setShowForm(false)}>Cancel</button>
+                <button type="button" className="btn btn-ghost" onClick={() => { setShowForm(false); setUploadError(null); }}>Cancel</button>
                 <button type="submit" className="btn btn-primary" disabled={loading}>
-                  {loading ? "Uploading..." : <><Check size={16} /> Save Work</>}
+                  {loading ? <><Upload size={15} /> Uploading...</> : <><Check size={16} /> Save Work</>}
                 </button>
               </div>
             </form>
@@ -166,7 +201,7 @@ export default function WorksPage() {
         <div className={styles.empty}>No works yet. Add your first project above.</div>
       ) : (
         <div className={styles.grid}>
-          {works.map((w) => (
+          {works?.map((w: any) => (
             <div key={w._id} className={styles.workCard}>
               <div className={styles.workImg}>
                 {w.imageUrl ? <img src={w.imageUrl} alt={w.title} /> : <div className={styles.noImg}>No Image</div>}
@@ -179,7 +214,7 @@ export default function WorksPage() {
                 </a>
               </div>
               <div className={styles.workActions}>
-                <button className="btn btn-danger" onClick={() => handleDelete(w._id as Id<"works">)}>
+                <button className="btn btn-danger" onClick={() => setDeleteId(w._id as Id<"works">)}>
                   <Trash2 size={14} />
                 </button>
               </div>
@@ -187,6 +222,15 @@ export default function WorksPage() {
           ))}
         </div>
       )}
+      <Modal
+        isOpen={!!deleteId}
+        onClose={() => setDeleteId(null)}
+        onConfirm={confirmDelete}
+        title="Delete Work"
+        message="Are you sure you want to delete this work? This action cannot be undone and it will be removed from your portfolio."
+        confirmText="Delete"
+        isLoading={isDeleting}
+      />
     </div>
   );
 }
