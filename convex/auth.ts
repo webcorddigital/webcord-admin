@@ -1,7 +1,6 @@
 import { mutation } from "./_generated/server";
 import { v } from "convex/values";
 
-const DEFAULT_PASSWORD = "webcord2025";
 const AUTH_KEY = "admin_password";
 
 // Securely verify password
@@ -13,9 +12,9 @@ export const verifyPassword = mutation({
       .withIndex("by_key", (q) => q.eq("key", AUTH_KEY))
       .unique();
     
-    const currentPassword = existing ? existing.value : DEFAULT_PASSWORD;
+    if (!existing || !existing.value) return false;
     
-    return args.password === currentPassword;
+    return args.password === existing.value;
   },
 });
 
@@ -31,7 +30,7 @@ export const updatePassword = mutation({
       .withIndex("by_key", (q) => q.eq("key", AUTH_KEY))
       .unique();
       
-    const currentPassword = existing ? existing.value : DEFAULT_PASSWORD;
+    const currentPassword = existing ? existing.value : null;
     
     if (args.oldPassword !== currentPassword) {
       throw new Error("Invalid current password");
