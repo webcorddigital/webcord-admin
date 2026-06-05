@@ -29,4 +29,25 @@ export default defineSchema({
     value: v.any(),
     updatedAt: v.number(),
   }).index("by_key", ["key"]),
+
+  plans: defineTable({
+    slug: v.string(),
+    category: v.union(v.literal("website"), v.literal("monthly"), v.literal("video")),
+    badge: v.string(),
+    name: v.string(),
+    price: v.number(),
+    priceLabel: v.string(),
+    delivery: v.string(),
+    features: v.array(v.string()),
+    featured: v.optional(v.boolean()),
+    description: v.string(),
+    whatYouGet: v.array(v.string()),
+    idealFor: v.array(v.string()),
+    faqs: v.array(v.object({ question: v.string(), answer: v.string() })),
+    reviewCount: v.number(),
+    reviewAvg: v.number(),
+    order: v.optional(v.number()),
+  })
+    .index("by_slug", ["slug"])
+    .index("by_category", ["category"]),
 });
