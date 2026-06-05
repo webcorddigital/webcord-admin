@@ -4,6 +4,7 @@ import { api } from "@/convex/_generated/api";
 import { useState, useEffect } from "react";
 import { Save } from "lucide-react";
 import styles from "./settings.module.css";
+import toast from "react-hot-toast";
 
 type ContactInfo = {
   whatsapp: string;
@@ -27,7 +28,6 @@ export default function SettingsPage() {
 
   const [contact, setContact] = useState<ContactInfo>(defaultContact);
   const [saving, setSaving] = useState(false);
-  const [saved, setSaved] = useState(false);
 
   useEffect(() => {
     if (contactSetting) {
@@ -45,10 +45,27 @@ export default function SettingsPage() {
         key: "contact_info",
         value: { ...contact, whatsappRaw: raw },
       });
-      setSaved(true);
-      setTimeout(() => setSaved(false), 2000);
+      toast.success("Contact settings updated successfully!");
+    } catch (e) {
+      toast.error("Failed to update contact settings");
     } finally {
       setSaving(false);
+    }
+  };
+
+  const updatePassword = useMutation(api.auth.updatePassword);
+  const [pwState, setPwState] = useState({ current: "", new: "", error: "", saving: false });
+
+  const handleUpdatePassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setPwState({ ...pwState, saving: true, error: "" });
+    try {
+      await updatePassword({ oldPassword: pwState.current, newPassword: pwState.new });
+      setPwState({ current: "", new: "", error: "", saving: false });
+      toast.success("Admin password updated successfully!");
+    } catch (err: any) {
+      setPwState({ ...pwState, saving: false, error: "Invalid current password" });
+      toast.error("Failed to update password");
     }
   };
 
@@ -82,7 +99,8 @@ export default function SettingsPage() {
             </div>
           </div>
           <button type="submit" className="btn btn-primary" disabled={saving}>
-            {saved ? <><Save size={14} /> Saved!</> : <><Save size={14} /> {saving ? "Saving..." : "Save Contact Info"}</>}
+            <Save size={14} />
+            {saving ? "Saving..." : "Save Contact Info"}
           </button>
         </form>
       </div>
@@ -103,6 +121,40 @@ export default function SettingsPage() {
             <span>Convex (Webcord.in project)</span>
           </div>
         </div>
+      </div>
+
+      <div className={styles.section}>
+        <h2 className={styles.sectionTitle}>Admin Password</h2>
+        <p className={styles.sectionNote}>Update the password used to access this admin panel.</p>
+        <form onSubmit={handleUpdatePassword} className={styles.form}>
+          <div className={styles.row}>
+            <div className="form-group">
+              <label>Current Password</label>
+              <input 
+                className="input" 
+                type="password" 
+                value={pwState.current} 
+                onChange={e => setPwState({ ...pwState, current: e.target.value })} 
+                required 
+              />
+            </div>
+            <div className="form-group">
+              <label>New Password</label>
+              <input 
+                className="input" 
+                type="password" 
+                value={pwState.new} 
+                onChange={e => setPwState({ ...pwState, new: e.target.value })} 
+                required 
+              />
+            </div>
+          </div>
+          {pwState.error && <p style={{ color: "red", fontSize: "0.8rem", marginBottom: "1rem" }}>{pwState.error}</p>}
+          <button type="submit" className="btn btn-primary" disabled={pwState.saving}>
+            <Save size={14} />
+            {pwState.saving ? "Updating..." : "Update Password"}
+          </button>
+        </form>
       </div>
     </div>
   );
